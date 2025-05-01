@@ -1,4 +1,4 @@
-use std::{fs::File, io::{self, BufRead, Write}};
+use std::{fs::File, io::{self, Write}};
 
 use clap::{Parser, Subcommand};
 
@@ -52,23 +52,21 @@ fn level_hard() -> Result<(), String> {
 type given sentences correctly.
         "#);
     let file = File::open("levels/hard.txt")
-        .map_err(|e|format!("Failed to open file\n {}",e))?;
+        .map_err(|e|format!("failed to open file\n {}", e.to_string()))?;
     let reader = io::BufReader::new(file);
-    let mut score = 0;
-    for line in reader.lines() {
-        let challenge = line.unwrap();
-        
-        println!("{}",challenge);
-        let mut buffer = String::new();
-        io::stdin().read_line(&mut buffer).map_err(|e|e.to_string())?;
-        if challenge == buffer.trim() {
-            println!("");
-            score += 1;
-        } else {
-            println!("❌");
-        }
-    }
 
+    let mut score = 0;
+    let challenge = String::from("using a raw string literal");
+    
+    println!("{}",challenge);
+    let mut buffer = String::new();
+    io::stdin().read_line(&mut buffer).map_err(|e|e.to_string())?;
+    if challenge == buffer.trim() {
+        println!("");
+        score += 1;
+    } else {
+        println!("❌");
+    }
     println!("score: {}", score);
     Ok(())
 
