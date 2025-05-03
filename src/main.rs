@@ -25,8 +25,12 @@ fn main() -> Result<(), String> {
 #[derive(Debug, Parser)]
 #[command(multicall = true)]
 struct Cli {
+    // training level
     #[command(subcommand)]
     level: Level,
+
+    // quit
+    quit: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -47,24 +51,24 @@ fn readline() -> Result<String, String> {
 }
 
 fn level(level: Level) -> Result<(), String> {
-    let mut file = Path::new("");
+    let file: &Path;
     match level {
         Level::Hard => {
-            file = String::from("levels/hard.txt");
+            file = Path::new("levels/hard.txt");
             println!(
         r#"Hard selected!
 type given sentences correctly.
         "#)
         },
         Level::Normal => { 
-            file = String::from("levels/normal.txt");
+            file = Path::new("levels/normal.txt");
             println!(
         r#"Normal selected!
 type given sentences correctly.
         "#)
         },
         Level::Easy => {
-            file = String::from("levels/easy.txt");
+            file = Path::new("levels/easy.txt");
             println!(
         r#"Easy selected!
 type given words correctly.
@@ -83,15 +87,14 @@ type given words correctly.
         let mut buffer = String::new();
         io::stdin().read_line(&mut buffer).map_err(|e|e.to_string())?;
         if challenge == buffer.trim() {
-            println!("");
             score += 1;
+            println!(" {}", score);
         } else {
-            println!("❌");
+            println!("❌ {}", score);
         }
     }
 
-    println!("score: {}", score);
+    println!("Total Score: {}", score);
     Ok(())
-
 }
 
