@@ -1,4 +1,4 @@
-use std::{fs::File, io::{self, BufRead, Write}};
+use std::{fs::File, io::{self, BufRead, Write}, path::Path};
 
 use clap::{Parser, Subcommand};
 
@@ -13,9 +13,9 @@ fn main() -> Result<(), String> {
 
     match parsed_cli {
         Ok(cli) => match cli.level {
-            Level::Hard => level_hard()?,
-            Level::Normal => level_hard()?,
-            Level::Easy => level_hard()?,
+            Level::Hard => level(Level::Hard)?,
+            Level::Normal => level(Level::Normal)?,
+            Level::Easy => level(Level::Easy)?,
         },
         Err(e) => println!("{}",e),
     }
@@ -46,14 +46,35 @@ fn readline() -> Result<String, String> {
     Ok(buffer.to_lowercase())
 }
 
-fn level_hard() -> Result<(), String> {
-    println!(
-        r#"hard selected!
+fn level(level: Level) -> Result<(), String> {
+    let mut file = Path::new("");
+    match level {
+        Level::Hard => {
+            file = String::from("levels/hard.txt");
+            println!(
+        r#"Hard selected!
 type given sentences correctly.
-        "#);
-    let file = File::open("levels/hard.txt")
+        "#)
+        },
+        Level::Normal => { 
+            file = String::from("levels/normal.txt");
+            println!(
+        r#"Normal selected!
+type given sentences correctly.
+        "#)
+        },
+        Level::Easy => {
+            file = String::from("levels/easy.txt");
+            println!(
+        r#"Easy selected!
+type given words correctly.
+        "#)
+        }
+    }
+
+    let buffreader = File::open(file)
         .map_err(|e|format!("Failed to open file\n {}",e))?;
-    let reader = io::BufReader::new(file);
+    let reader = io::BufReader::new(buffreader);
     let mut score = 0;
     for line in reader.lines() {
         let challenge = line.unwrap();
@@ -74,9 +95,3 @@ type given sentences correctly.
 
 }
 
-fn level_normal() {
-    println!("normal selected")
-}
-fn level_easy() {
-    println!("easy selected")
-}
