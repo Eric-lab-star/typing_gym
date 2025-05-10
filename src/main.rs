@@ -22,15 +22,13 @@ fn main() -> Result<(), String> {
     Ok(())
 }
 
+
 #[derive(Debug, Parser)]
 #[command(multicall = true)]
 struct Cli {
     // training level
     #[command(subcommand)]
     level: Level,
-
-    // quit
-    quit: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -51,50 +49,63 @@ fn readline() -> Result<String, String> {
 }
 
 fn level(level: Level) -> Result<(), String> {
-    let file: &Path;
-    match level {
-        Level::Hard => {
-            file = Path::new("levels/hard.txt");
-            println!(
-        r#"Hard selected!
-type given sentences correctly.
-        "#)
-        },
-        Level::Normal => { 
-            file = Path::new("levels/normal.txt");
-            println!(
-        r#"Normal selected!
-type given sentences correctly.
-        "#)
-        },
-        Level::Easy => {
-            file = Path::new("levels/easy.txt");
-            println!(
-        r#"Easy selected!
-type given words correctly.
-        "#)
-        }
-    }
+    let level_file = load_level(level)?;
 
-    let buffreader = File::open(file)
-        .map_err(|e|format!("Failed to open file\n {}",e))?;
-    let reader = io::BufReader::new(buffreader);
+    let level_reader = io::BufReader::new(level_file);
+
     let mut score = 0;
-    for line in reader.lines() {
+    
+    for line in level_reader.lines() {
         let challenge = line.unwrap();
         
-        println!("{}",challenge);
+        println!("{challenge}");
+
         let mut buffer = String::new();
         io::stdin().read_line(&mut buffer).map_err(|e|e.to_string())?;
+
+        if buffer.trim() == "quit" {
+            println!("Quiting Game...");
+            println!("Score: {score}");
+            return Ok(())
+        }
+
         if challenge == buffer.trim() {
             score += 1;
-            println!(" {}", score);
+            println!("  {score}");
         } else {
-            println!("❌ {}", score);
+            println!("❌ {score}");
         }
+        
     }
 
     println!("Total Score: {}", score);
     Ok(())
 }
+
+fn load_level(level: Level) -> Result<File, String> {
+    
+    let (message, path) = match level {
+        Level::Hard => (
+        r#"Hard selected!
+type given sentences correctly."#,
+        Path::new("levels/hard.txt")),
+        Level::Normal => (
+        r#"Normal selected!
+type given sentences correctly."#,
+            Path::new("levels/normal.txt")
+        ),
+        Level::Easy => (
+        r#"Easy selected!
+type given words correctly.
+        "#,
+        Path::new("levels/easy.txt")
+        )
+    };
+
+    println!("{message}");
+    println!("type \'quit\' to quit game");
+    File::open(path).map_err(|e|format!("Failed to open file\n {}",e))
+}
+
+
 
